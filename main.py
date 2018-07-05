@@ -55,7 +55,7 @@ def listDirectory(directory, fileExtList):
                 if os.path.splitext(f)[1] in fileExtList]
     return fileList
 
-#listaKat = listDirectory("D:\\ziarno2\\TIFF\\Wybity", [".tif"])
+#listaKat = listDirectory("D:\\ziarno2\\TIFF", [".tif"])
 listaKatLog1 = listDirectory("D:\\ziarno2\\TIFF\\Wybity", [".tif"])
 findText = "log1.tif"
 mylist = []
@@ -67,31 +67,38 @@ for i in listaKatLog1:
 
 for idList in range(0,len(mylist)):
     imgStr = mylist[idList]
-    #04336_t.png_log1.tif ID[-20:-15] TYPE[-14:-13] 
-    imgID = imgStr[-20:-15]             #Grain ID 
-    imgTYPE = imgStr[-14:-13]           #Side grain b or t (back / trench)
-    image1= cv2.imread(mylist[idList])
-    idList = idList+1
+#04336_t.png_log1.tif ID[-20:-15] TYPE[-14:-13] 
+    imgID = imgStr[-20:-15]                 #Grain ID 
+    imgCamSide = imgStr[-14:-13]               #What side of camera b or t (back / top)
+    image1= cv2.imread(mylist[idList])      #read first image to matrix
+    idList = idList+1                       #incremet idList to find second image
     if imgID in mylist[idList]:
         image2= cv2.imread(mylist[idList])
-        print(mylist[idList]+ "\n" + mylist[idList])
+        print(mylist[idList-1]+ "\n" + mylist[idList])
 
-        print(imgStr[-14:-13])
+        print(imgStr[-5:-4])
+        imgStrCheck = imgStr[:-5] + "2" + imgStr[-4:]
+        image1Check = cv2.imread(imgStrCheck) 
+        #print(imgStrCheck)
+#
         h1, w1 = image1.shape[:2]
         h2, w2 = image2.shape[:2]
         if h1 > h2:
             merageImg = np.zeros((h1, w1+w2, 3), np.uint8)
-            merageImg [:h1, :w1] = image1
-            merageImg [:h2, w1:w1+w2] = image2
         else:
             merageImg = np.zeros((h2, w1+w2, 3), np.uint8)
+
+        if image1Check[h1//2,w1//2][2]==255:
+            print("switch")
+            merageImg [:h2, :w2] = image2
+            merageImg [:h1, w2:w2+w1] = image1
+        else:
             merageImg [:h1, :w1] = image1
             merageImg [:h2, w1:w1+w2] = image2
-
 
         cv2.imshow("Merage Image", merageImg)
         cv2.imwrite("test.png",merageImg)
-        cv2.waitKey(0)
+        cv2.waitKey(5)
 
 
 
