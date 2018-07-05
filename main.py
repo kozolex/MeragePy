@@ -59,34 +59,41 @@ def listDirectory(directory, fileExtList):
 listaKatLog1 = listDirectory("D:\\ziarno2\\TIFF\\Wybity", [".tif"])
 findText = "log1.tif"
 mylist = []
+#Create new list with only tif RGB images
 for i in listaKatLog1:
     if findText in i:
-        print(i)
+        #print(i)
         mylist.append(i)
 
-        
-
-
-
-#print(imgSource)
-for idList in range(len(mylist)):
+for idList in range(0,len(mylist)):
+    imgStr = mylist[idList]
+    #04336_t.png_log1.tif ID[-20:-15] TYPE[-14:-13] 
+    imgID = imgStr[-20:-15]             #Grain ID 
+    imgTYPE = imgStr[-14:-13]           #Side grain b or t (back / trench)
     image1= cv2.imread(mylist[idList])
-    image2= cv2.imread(mylist[idList+1])
-    h1, w1 = image1.shape[:2]
-    h2, w2 = image2.shape[:2]
-    if h1 > h2:
-        merageImg = np.zeros((h1, w1+w2, 3), np.uint8)
-        merageImg [:h1, :w1] = image1
-        merageImg [:h2, w1:w1+w2] = image2
-    else:
-        merageImg = np.zeros((h2, w1+w2, 3), np.uint8)
-        merageImg [:h1, :w1] = image1
-        merageImg [:h2, w1:w1+w2] = image2
+    idList = idList+1
+    if imgID in mylist[idList]:
+        image2= cv2.imread(mylist[idList])
+        print(mylist[idList]+ "\n" + mylist[idList])
+
+        print(imgStr[-14:-13])
+        h1, w1 = image1.shape[:2]
+        h2, w2 = image2.shape[:2]
+        if h1 > h2:
+            merageImg = np.zeros((h1, w1+w2, 3), np.uint8)
+            merageImg [:h1, :w1] = image1
+            merageImg [:h2, w1:w1+w2] = image2
+        else:
+            merageImg = np.zeros((h2, w1+w2, 3), np.uint8)
+            merageImg [:h1, :w1] = image1
+            merageImg [:h2, w1:w1+w2] = image2
 
 
-    cv2.imshow("Merage Image", merageImg)
-    cv2.imwrite("test.png",merageImg)
-    cv2.waitKey(0)
+        cv2.imshow("Merage Image", merageImg)
+        cv2.imwrite("test.png",merageImg)
+        cv2.waitKey(0)
+
+
 
 #1 os.listdir(directory) zwraca listę wszystkich plików i podkatalogów w katalogu directory.
 #2 Iterując po liście z użyciem zmiennej f, wykorzystujemy os.path.normcase(f), aby znormalizować wielkość liter zgodnie z domyślną wielkością liter w systemem operacyjnym. Funkcja normcase jest użyteczną, prostą funkcją, która stanowi równoważnik pomiędzy systemami operacyjnymi, w których wielkość liter w nazwie pliku nie ma znaczenia, w którym np. mahadeva.mp3 i mahadeva.MP3 są takimi samymi plikami. Na przykład w Windowsie i Mac OS, normcase będzie konwertował całą nazwę pliku na małe litery, a w systemach kompatybilnych z UNIX-em funkcja ta będzie zwracała niezmienioną nazwę pliku.
