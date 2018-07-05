@@ -77,10 +77,10 @@ for idList in range(len(mylist)):
     if h1 > h2:
         merageImg = np.zeros((h1, w1+w2, 3), np.uint8)
         merageImg [:h1, :w1] = image1
-        merageImg [:h1, w1:w1+w2] = image2
+        merageImg [:h2, w1:w1+w2] = image2
     else:
         merageImg = np.zeros((h2, w1+w2, 3), np.uint8)
-        merageImg [:h2, :w1] = image1
+        merageImg [:h1, :w1] = image1
         merageImg [:h2, w1:w1+w2] = image2
 
 
