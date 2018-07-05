@@ -1,6 +1,6 @@
 """Workflow:
 1. odczyt zawartości katalogów
-2.  
+2.  ...
 """
 import numpy as np 
 import cv2
