@@ -80,7 +80,7 @@ for idList in range(0,len(mylist)):
         imgStrCheck = imgStr[:-5] + "2" + imgStr[-4:]
         image1Check = cv2.imread(imgStrCheck) 
         #print(imgStrCheck)
-#
+#FULL SIZE 396 x 920
         h1, w1 = image1.shape[:2]
         h2, w2 = image2.shape[:2]
         if h1 > h2:
