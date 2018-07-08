@@ -56,8 +56,9 @@ def listDirectory(directory, fileExtList):
     return fileList
 
 #listaKat = listDirectory("D:\\ziarno2\\TIFF", [".tif"])
-listaKatLog1 = listDirectory("D:\\ziarno2\\TIFF\\Wybity", [".tif"])
+listaKatLog1 = listDirectory("D:/ziarno2/TIFF/Wybity", [".tif"])
 findText = "log1.tif"
+imgToBigCounter = 0 
 mylist = []
 #Create new list with only tif RGB images
 for i in listaKatLog1:
@@ -71,8 +72,9 @@ for idList in range(0,len(mylist)):
     imgID = imgStr[-20:-15]                 #Grain ID 
     imgCamSide = imgStr[-14:-13]            #What side of camera b or t (back / top)
     image1= cv2.imread(mylist[idList])      #read first image to matrix
-    idList = idList+1                       #incremet idList to find second image
-    imgToBigCounter = 0                     #Counter how many image is too big to target resolution
+    if idList<=len(mylist):
+        idList = idList+1                       #incremet idList to find second image
+                        #Counter how many image is too big to target resolution
     if imgID in mylist[idList]:
         image2= cv2.imread(mylist[idList])
         print(mylist[idList-1]+ "\n" + mylist[idList])
