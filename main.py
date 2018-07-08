@@ -56,7 +56,7 @@ def listDirectory(directory, fileExtList):
     return fileList
 
 #listaKat = listDirectory("D:\\ziarno2\\TIFF", [".tif"])
-listaKatLog1 = listDirectory("D:\\ziarno2\\TIFF\\JOVincenta", [".tif"])
+listaKatLog1 = listDirectory("D:\\ziarno2\\TIFF\\Wybity", [".tif"])
 findText = "log1.tif"
 mylist = []
 #Create new list with only tif RGB images
