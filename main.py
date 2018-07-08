@@ -108,7 +108,7 @@ for idList in range(0,len(mylist)):
 
             cv2.imshow("Merage Image", merageImg)
             #cv2.imwrite("test.png",merageImg)
-            cv2.waitKey(5)
+            cv2.waitKey(500)
 
 
 
