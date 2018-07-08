@@ -56,7 +56,7 @@ def listDirectory(directory, fileExtList):
     return fileList
 
 #listaKat = listDirectory("D:\\ziarno2\\TIFF", [".tif"])
-listaKatLog1 = listDirectory("D:\\ziarno2\\TIFF\\Wybity", [".tif"])
+listaKatLog1 = listDirectory("D:\\ziarno2\\TIFF\\JOVincenta", [".tif"])
 findText = "log1.tif"
 mylist = []
 #Create new list with only tif RGB images
@@ -83,8 +83,8 @@ for idList in range(0,len(mylist)):
         #print(imgStrCheck)
 
         #size of images FULL SIZE 396 x 920
-        hMax = 920
-        wMax = 396
+        hMax = 850
+        wMax = 400
         h1, w1 = image1.shape[:2]
         h2, w2 = image2.shape[:2]
         hPadding1 = (hMax-h1)//2
@@ -107,7 +107,7 @@ for idList in range(0,len(mylist)):
                 merageImg [hPadding2: h2 + hPadding2, w1+wPadding2+wPadding1:w1+w2+wPadding2+wPadding1] = image2
 
             cv2.imshow("Merage Image", merageImg)
-            #cv2.imwrite("test.png",merageImg)
+            cv2.imwrite("d:/test/a/test.png",merageImg)
             cv2.waitKey(500)
 
 
