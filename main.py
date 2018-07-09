@@ -56,7 +56,8 @@ def listDirectory(directory, fileExtList):
     return fileList
 
 #listaKat = listDirectory("D:\\ziarno2\\TIFF", [".tif"])
-listaKatLog1 = listDirectory("D:/ziarno2/TIFF/Wybity", [".tif"])
+#listaKatLog1 = listDirectory("D:/ziarno2/TIFF/Wybity", [".tif"])
+listaKatLog1 = listDirectory("D:/Doktorat/noweFotyZiaren/uszkodzenia/Wybity", [".tif"])
 findText = "log1.tif"
 imgToBigCounter = 0 
 mylist = []
