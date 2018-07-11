@@ -22,14 +22,23 @@ def listDirectory(directory, fileExtList):
                 if os.path.splitext(f)[1] in fileExtList]
     return fileList1, fileList2
 
-#listaKat = listDirectory("D:\\ziarno2\\TIFF", [".tif"])
-#listaPlikLog1 = listDirectory("D:/ziarno2/TIFF/Wybity", [".tif"])
-listaKat, listaPlikLog1 = listDirectory("D:/Doktorat/noweFotyZiaren/uszkodzenia/wybity", [".tif"])
+#listFolders = listDirectory("D:\\ziarno2\\TIFF", [".tif"])
+#listFiles = listDirectory("D:/ziarno2/TIFF/Wybity", [".tif"])
+sourceDir = "D:/Doktorat/noweFotyZiaren/uszkodzenia"
+extentionFile = ".tif"
+listFolders, listFiles = listDirectory(sourceDir, [extentionFile])
+print("Katalogi:\n")
+for iterate in listFolders:
+    if not "." in iterate:
+        print(iterate)
+cv2.waitKey(2000)
+
+
 findText = "log1.tif"
 imgToBigCounter = 0 
 mylist = []
 #Create new list with only tif RGB images
-for i in listaPlikLog1:
+for i in listFiles:
     if findText in i:
         #print(i)
         mylist.append(i)
