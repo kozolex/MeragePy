@@ -9,7 +9,7 @@ import sys
 
 #listowanie wskazanego 
 def stripnulls(data):
-    u"usuwa białe znaki i nulle"
+    u"delete white sign and nulls"
     return data.replace("\00", " ").strip()
 
 class FileInfo(dict):
@@ -18,39 +18,11 @@ class FileInfo(dict):
         dict.__init__(self)
         self["plik"] = filename
     
-class MP3FileInfo(FileInfo):
-    u"przechowuje znaczniki ID3v1.0 MP3"
-    tagDataMap = {u"tytuł"    : (  3,  33, stripnulls),
-                  "artysta"   : ( 33,  63, stripnulls),
-                  "album"     : ( 63,  93, stripnulls),
-                  "rok"       : ( 93,  97, stripnulls),
-                  "komentarz" : ( 97, 126, stripnulls),
-                  "gatunek"   : (127, 128, ord)}
-    
-    def __parse(self, filename):
-        u"parsuje znaczniki ID3v1.0 z pliku MP3"
-        self.clear()
-        try:
-            fsock = open(filename, "rb", 0)
-            try:
-                fsock.seek(-128, 2)
-                tagdata = fsock.read(128)
-            finally:
-                fsock.close()
-            if tagdata[:3] == 'TAG':
-                for tag, (start, end, parseFunc) in self.tagDataMap.items():
-                    self[tag] = parseFunc(tagdata[start:end])
-        except IOError:
-            pass
-
-    def __setitem__(self, key, item):
-        if key == "plik" and item:
-            self.__parse(item)
-        FileInfo.__setitem__(self, key, item)
 
 def listDirectory(directory, fileExtList):
     u"zwraca listę obiektów zawierających metadane dla plików o podanych rozszerzeniach"
     fileList1 = [os.path.normcase(f) for f in os.listdir(directory)]
+    #try what inside - will be deletet in future
     """print("Katalogi:\n")
     for iterate in fileList1:
         if not "." in iterate:
