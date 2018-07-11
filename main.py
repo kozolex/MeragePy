@@ -7,17 +7,6 @@ import cv2
 import os
 import sys
 
-#listowanie wskazanego 
-def stripnulls(data):
-    u"delete white sign and nulls"
-    return data.replace("\00", " ").strip()
-
-class FileInfo(dict):
-    u"przechowuje metadane pliku"
-    def __init__(self, filename=None):
-        dict.__init__(self)
-        self["plik"] = filename
-    
 
 def listDirectory(directory, fileExtList):
     u"zwraca listę obiektów zawierających metadane dla plików o podanych rozszerzeniach"
