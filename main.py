@@ -50,19 +50,25 @@ class MP3FileInfo(FileInfo):
 
 def listDirectory(directory, fileExtList):
     u"zwraca listę obiektów zawierających metadane dla plików o podanych rozszerzeniach"
-    fileList = [os.path.normcase(f) for f in os.listdir(directory)]
-    fileList = [os.path.join(directory, f) for f in fileList \
+    fileList1 = [os.path.normcase(f) for f in os.listdir(directory)]
+    """print("Katalogi:\n")
+    for iterate in fileList1:
+        if not "." in iterate:
+            print(iterate)
+    cv2.waitKey(2000)
+    """
+    fileList2 = [os.path.join(directory, f) for f in fileList1 \
                 if os.path.splitext(f)[1] in fileExtList]
-    return fileList
+    return fileList1, fileList2
 
 #listaKat = listDirectory("D:\\ziarno2\\TIFF", [".tif"])
-#listaKatLog1 = listDirectory("D:/ziarno2/TIFF/Wybity", [".tif"])
-listaKatLog1 = listDirectory("D:/Doktorat/noweFotyZiaren/uszkodzenia/Wybity", [".tif"])
+#listaPlikLog1 = listDirectory("D:/ziarno2/TIFF/Wybity", [".tif"])
+listaKat, listaPlikLog1 = listDirectory("D:/Doktorat/noweFotyZiaren/uszkodzenia/wybity", [".tif"])
 findText = "log1.tif"
 imgToBigCounter = 0 
 mylist = []
 #Create new list with only tif RGB images
-for i in listaKatLog1:
+for i in listaPlikLog1:
     if findText in i:
         #print(i)
         mylist.append(i)
