@@ -10,35 +10,31 @@ import sys
 
 def listDirectory(directory, fileExtList):
     u"zwraca listę obiektów zawierających metadane dla plików o podanych rozszerzeniach"
-    fileList1 = [os.path.normcase(f) for f in os.listdir(directory)]
-    #try what inside - will be deletet in future
-    """print("Katalogi:\n")
-    for iterate in fileList1:
-        if not "." in iterate:
-            print(iterate)
-    cv2.waitKey(2000)
-    """
-    fileList2 = [os.path.join(directory, f) for f in fileList1 \
-                if os.path.splitext(f)[1] in fileExtList]
-    return fileList1, fileList2
+    fileList = [os.path.normcase(f) for f in os.listdir(directory)]
+    if len(fileList)==0:
+        fileList = [os.path.join(directory, f) for f in fileList \
+                    if os.path.splitext(f)[1] in fileExtList]
+    return fileList
 
 #listFolders = listDirectory("D:\\ziarno2\\TIFF", [".tif"])
 #listFiles = listDirectory("D:/ziarno2/TIFF/Wybity", [".tif"])
 sourceDir = "D:/Doktorat/noweFotyZiaren/uszkodzenia"
 extentionFile = ".tif"
-listFolders, listFiles = listDirectory(sourceDir, [extentionFile])
-print("Katalogi:\n")
-for iterate in listFolders:
-    if not "." in iterate:
-        print(iterate)
-cv2.waitKey(2000)
+listFiles = listDirectory(sourceDir, [extentionFile])
 
-
+if len(listFiles) == 0:
+    print("No files inside")
+for listFolders in listFiles:
+    listFoldersActual = sourceDir + "/" + str(listFolders)
+    listFiles2 = listDirectory(listFoldersActual, [extentionFile])
+    """for imagesss in listFiles2:
+        print(imagesss)
+    cv2.waitKey(10000)"""
 findText = "log1.tif"
 imgToBigCounter = 0 
 mylist = []
 #Create new list with only tif RGB images
-for i in listFiles:
+for i in listFiles2:
     if findText in i:
         #print(i)
         mylist.append(i)
@@ -48,12 +44,12 @@ for idList in range(0,len(mylist)):
 #04336_t.png_log1.tif ID[-20:-15] TYPE[-14:-13] 
     imgID = imgStr[-20:-15]                 #Grain ID 
     imgCamSide = imgStr[-14:-13]            #What side of camera b or t (back / top)
-    image1= cv2.imread(mylist[idList])      #read first image to matrix
+    image1= cv2.imread(listFoldersActual + mylist[idList])      #read first image to matrix
     if idList<=len(mylist):
         idList = idList+1                       #incremet idList to find second image
                         #Counter how many image is too big to target resolution
     if imgID in mylist[idList]:
-        image2= cv2.imread(mylist[idList])
+        image2= cv2.imread(listFoldersActual + mylist[idList])
         print(mylist[idList-1]+ "\n" + mylist[idList])
 
         print(imgStr[-5:-4])
