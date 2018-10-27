@@ -67,8 +67,8 @@ for idList in range(0,len(mylist)):
                 merageImg [hPadding1: h1 + hPadding1, wPadding2+wPadding1:w1 + wPadding2+wPadding1] = image1
                 merageImg [hPadding2: h2 + hPadding2, w1+wPadding2+wPadding1:w1+w2+wPadding2+wPadding1] = image2
 
-            #cv2.imshow("Merage Image", merageImg)
-            cv2.imwrite("D:/ziarno2/PNG/ZielZadesz/"+imgID+".png",merageImg)
+            cv2.imshow("Merage Image", merageImg)
+            #cv2.imwrite("D:/ziarno2/PNG/ZielZadesz/"+imgID+".png",merageImg)
             #cv2.waitKey(500)
 
 

@@ -1,7 +1,9 @@
 import os
+import random
+from PIL import Image as PilImage
 
 class FileExplorer:
-    def __init__(self, input_root):
+    def __init__(self, input_root):         
         self.input_root = input_root
         self.visitors = []
         
