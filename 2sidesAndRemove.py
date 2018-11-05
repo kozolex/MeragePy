@@ -1,21 +1,31 @@
 """Workflow:
 1. odczyt zawartości katalogów
-2.  ...
+2. usunięcie tła
+3. połączenie obrazów
 """
 import numpy as np 
 import cv2
 import os
 import sys
 
-def listDirectory(directory, fileExtList):
-    u"zwraca listę obiektów zawierających metadane dla plików o podanych rozszerzeniach"
-    fileList = os.listdir(directory)
-    fileList = [os.path.join(directory, f) for f in fileList \
-                if os.path.splitext(f)[1] in fileExtList]
-    return fileList
+class PreprocessImg(dirPath):
+
+    def listDirectory (directory, fileExtList):
+        u"zwraca listę obiektów zawierających metadane dla plików o podanych rozszerzeniach"
+        fileList = os.listdir(directory)
+        fileList = [os.path.join(directory, f) for f in fileList \
+                    if os.path.splitext(f)[1] in fileExtList]
+        return fileList
+
+    def merage2Img (dirSource, extention, width, height):
+        u"zwraca "
+        listaKatLog1 = listDirectory("E:/ZIARNA/NoweStanowisko/180708/Zdrowe", [extention])
+    
+
+    return image3
 
 #listaKat = listDirectory("D:\\ziarno2\\TIFF", [".tif"])
-listaKatLog1 = listDirectory("E:/ZIARNA/NoweStanowisko/180708/Zdrowe", [".tif"])
+
 findText = "log2.tif"
 imgToBigCounter = 0 
 mylist = []
