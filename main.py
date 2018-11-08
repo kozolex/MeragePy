@@ -14,6 +14,10 @@ def listDirectory(directory, fileExtList):
                 if os.path.splitext(f)[1] in fileExtList]
     return fileList
 
+
+
+    return image3
+
 #listaKat = listDirectory("D:\\ziarno2\\TIFF", [".tif"])
 listaKatLog1 = listDirectory("E:/ZIARNA/NoweStanowisko/180708/Zdrowe", [".tif"])
 findText = "log2.tif"
