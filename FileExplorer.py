@@ -48,11 +48,11 @@ class CropVisitor:
             gray = cv2.cvtColor(srcImage, cv2.COLOR_RGB2GRAY)
 
             ## 3. Do morph-close-op and Threshold
-            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9,9))
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
             morphed = cv2.morphologyEx(gray,cv2.MORPH_CLOSE, kernel)
             cv2.imshow("morphed",morphed)
 
-            th, threshed = cv2.threshold(morphed, 40, 255, 0)
+            th, threshed = cv2.threshold(morphed, 50, 255, 0)
 
             cv2.imshow("threshed",threshed)
             ## 4. Findcontours and filter by Area
