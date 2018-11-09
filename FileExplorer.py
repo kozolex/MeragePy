@@ -148,7 +148,8 @@ def process_dataset(input_root, visitor, dir_index=None, limit=None):
             explorer.process_dir(dirs[i], limit=limit)
 
 MOD_SIZE = 1000
-input_root = 'C:/ZIARNA/NS2/NoweStanowisko/180708'
+#input_root = 'C:/ZIARNA/NS2/NoweStanowisko/180708' # D:\NoweStanowisko\180708
+input_root = 'D:\\NoweStanowisko\\180708' # D:\NoweStanowisko\180708
 output_root = 'C:\TEST'
 
 if os.path.exists(output_root):

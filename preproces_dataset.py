@@ -2,15 +2,15 @@ import os
 import random
 from PIL import Image as PilImage
 
-class FileExplorer:
+class FileExplorer:                 
     def __init__(self, input_root):         
-        self.input_root = input_root                   #przechowywanie stringa ścieżki głównej
-        self.visitors = []                             #
+        self.input_root = input_root
+        self.visitors = []
         
-    def add_visitor(self, visitor):                     #
+    def add_visitor(self, visitor):
         self.visitors.append(visitor)
         
-    def get_dirs(self):                             #listowanie katalogu
+    def get_dirs(self):
         dirs = []
         for d in os.listdir(self.input_root):
             path = os.path.join(self.input_root, d)
