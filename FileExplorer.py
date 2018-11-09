@@ -38,6 +38,33 @@ class FileExplorer:
 class CropVisitor:
     def __init__(self, root):
         self.root = root
+    
+    def find_bigCountour(self, srcImage):
+        self.srcImage = srcImage
+        gray = cv2.cvtColor(srcImage, cv2.COLOR_RGB2GRAY)
+
+        ## 3. Do morph-close-op and Threshold
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+        morphed = cv2.morphologyEx(gray,cv2.MORPH_CLOSE, kernel)
+        #cv2.imshow("morphed",morphed)
+
+        th, threshed = cv2.threshold(morphed, 35, 255, 0)
+
+        #cv2.imshow("threshed",threshed)
+        ## 4. Findcontours and filter by Area
+        im2, contours, hierarchy = cv2.findContours(threshed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        
+        bigContourArea = 0
+        bigContourId = 0
+        for i, idContours in enumerate(contours):
+            contourArea = cv2.contourArea(contours[i])
+            if contourArea > bigContourArea:
+                bigContourArea = contourArea
+                bigContourId = i
+        #print(bigContourId, fname, bigContourArea )
+
+
+        return contours[bigContourId]
         
     def visit(self, file_path):
         input_root, fdir, fname = file_path
@@ -45,37 +72,24 @@ class CropVisitor:
             image_path = os.path.join(*file_path)
 
             srcImage = cv2.imread(image_path, cv2.IMREAD_COLOR)
-            gray = cv2.cvtColor(srcImage, cv2.COLOR_RGB2GRAY)
-
-            ## 3. Do morph-close-op and Threshold
-            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
-            morphed = cv2.morphologyEx(gray,cv2.MORPH_CLOSE, kernel)
-            cv2.imshow("morphed",morphed)
-
-            th, threshed = cv2.threshold(morphed, 35, 255, 0)
-
-            cv2.imshow("threshed",threshed)
-            ## 4. Findcontours and filter by Area
-            im2, contours, hierarchy = cv2.findContours(threshed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            canvas = np.zeros_like(srcImage, np.uint8)
-            bigContourArea = 0
-            bigContourId = 0
-            for i, idContours in enumerate(contours):
-                contourArea = cv2.contourArea(contours[i])
-                if contourArea > bigContourArea:
-                    bigContourArea = contourArea
-                    bigContourId = i
-            print(bigContourId, fname, bigContourArea )
-            rect = cv2.minAreaRect(contours[bigContourId])
+#TU FIND BIG COUNTOUR
+            contourBig = self.find_bigCountour(srcImage)
+            rect = cv2.minAreaRect(contourBig)
             box = cv2.boxPoints(rect)
-            x,y,w,h = cv2.boundingRect(contours[bigContourId])
-            padding = 20
-            cv2.rectangle(srcImage,(x-padding,y-padding),(x+w+padding,y+h+padding),(0,255,0),2)
+            x,y,w,h = cv2.boundingRect(contourBig)
+            paddingX = int((MOD_SIZE - w)/2)
+            paddingY = int((MOD_SIZE - h)/2)
+            padding = 30
+            #cv2.rectangle(srcImage,(x-padding,y-padding),(x+w+padding,y+h+padding),(0,255,0),2)
 
             #cv2.drawContours(srcImage, contours[bigContourId], -1, (0,255,0), 5, cv2.FILLED)
             #box = np.int0(box) #wymagane przy drawCountour - ponizej
             #cv2.drawContours(srcImage,[box],0,(0,0,255),2)
-            roi = srcImage[y-padding:y+h+padding,x-padding:x+w+padding]
+            roi = srcImage[y-padding : y+h+padding, x-padding : x+w+padding] # Y1:Y2 , X1:X2
+
+            #roi = cv2.bitwise_and(roi,roi,mask = roiThreshed)
+
+            res = cv2.resize(roi,(int(w/4),int(h/4)), cv2.INTER_CUBIC)
             #for cnt in contours:
                # if cv2.contourArea(cnt) < AREA:
                #     cv2.drawContours(canvas, [cnt], -1, (0,255,0), 5, cv2.LINE_AA)
@@ -83,6 +97,7 @@ class CropVisitor:
             ## 
             #cv2.imshow("img",srcImage)
             cv2.imshow("roi",roi)
+            cv2.imshow("res",res)
             cv2.waitKey(0)
             #srcImage = PilImage.open(image_path)
             #modified = PilImage.new(srcImage.mode, (MOD_SIZE, MOD_SIZE))
@@ -154,9 +169,9 @@ def process_dataset(input_root, visitor, dir_index=None, limit=None):
             #print "Processing dir", dirs[i]
             explorer.process_dir(dirs[i], limit=limit)
 
-MOD_SIZE = 1000
-#input_root = 'C:/ZIARNA/NS2/NoweStanowisko/180708' # D:\NoweStanowisko\180708
-input_root = 'D:\\NoweStanowisko\\180708' # D:\NoweStanowisko\180708
+MOD_SIZE = 896
+input_root = 'C:/ZIARNA/NS2/NoweStanowisko/180708' # D:\NoweStanowisko\180708
+#input_root = 'D:\\NoweStanowisko\\180708' # D:\NoweStanowisko\180708
 output_root = 'C:\TEST'
 
 if os.path.exists(output_root):
