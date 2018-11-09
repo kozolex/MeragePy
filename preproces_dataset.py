@@ -4,13 +4,13 @@ from PIL import Image as PilImage
 
 class FileExplorer:
     def __init__(self, input_root):         
-        self.input_root = input_root
-        self.visitors = []
+        self.input_root = input_root                   #przechowywanie stringa ścieżki głównej
+        self.visitors = []                             #
         
-    def add_visitor(self, visitor):
+    def add_visitor(self, visitor):                     #
         self.visitors.append(visitor)
         
-    def get_dirs(self):
+    def get_dirs(self):                             #listowanie katalogu
         dirs = []
         for d in os.listdir(self.input_root):
             path = os.path.join(self.input_root, d)
