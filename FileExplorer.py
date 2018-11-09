@@ -52,7 +52,7 @@ class CropVisitor:
             morphed = cv2.morphologyEx(gray,cv2.MORPH_CLOSE, kernel)
             cv2.imshow("morphed",morphed)
 
-            th, threshed = cv2.threshold(morphed, 50, 255, 0)
+            th, threshed = cv2.threshold(morphed, 35, 255, 0)
 
             cv2.imshow("threshed",threshed)
             ## 4. Findcontours and filter by Area
@@ -68,14 +68,21 @@ class CropVisitor:
             print(bigContourId, fname, bigContourArea )
             rect = cv2.minAreaRect(contours[bigContourId])
             box = cv2.boxPoints(rect)
-            cv2.drawContours(srcImage, contours[bigContourId], -1, (0,255,0), 5, cv2.FILLED)
+            x,y,w,h = cv2.boundingRect(contours[bigContourId])
+            padding = 20
+            cv2.rectangle(srcImage,(x-padding,y-padding),(x+w+padding,y+h+padding),(0,255,0),2)
 
+            #cv2.drawContours(srcImage, contours[bigContourId], -1, (0,255,0), 5, cv2.FILLED)
+            #box = np.int0(box) #wymagane przy drawCountour - ponizej
+            #cv2.drawContours(srcImage,[box],0,(0,0,255),2)
+            roi = srcImage[y-padding:y+h+padding,x-padding:x+w+padding]
             #for cnt in contours:
                # if cv2.contourArea(cnt) < AREA:
                #     cv2.drawContours(canvas, [cnt], -1, (0,255,0), 5, cv2.LINE_AA)
 
             ## 
-            cv2.imshow("img",srcImage)
+            #cv2.imshow("img",srcImage)
+            cv2.imshow("roi",roi)
             cv2.waitKey(0)
             #srcImage = PilImage.open(image_path)
             #modified = PilImage.new(srcImage.mode, (MOD_SIZE, MOD_SIZE))
