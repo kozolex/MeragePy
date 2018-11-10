@@ -108,15 +108,35 @@ class CropVisitor:
             #print("ROI result= ",roiSizeX,roiSizeY)
 #II etap bineralizacji
             mask = np.zeros((paddingDown - paddingTop , paddingRight - paddingLeft ),np.uint8)
-            contourBig, x,y,w,h  = self.find_bigCountour(roi, 15) # self.metod
-            
-            paddingX = int((4*MOD_SIZE_X - w)/2)
-            paddingY = int((4*MOD_SIZE_Y - h)/2)
+            contourBig, x,y,w,h  = self.find_bigCountour(roi, 25) # self.metod
+            MOD_SIZE_X_BIG = ORG_SIZE_MP*MOD_SIZE_X   #Wielkość obrazy docelowego
+            MOD_SIZE_Y_BIG = ORG_SIZE_MP*MOD_SIZE_Y
+
             cv2.drawContours(mask,[contourBig],0,255,-1)
             try:
                 roi = cv2.bitwise_and(roi,roi,mask = mask)
                 roi = roi[y : y+h, x : x+w]
-            
+#Wychwycenie obrazów zbyd dużych i przycięcie ich
+                if MOD_SIZE_X_BIG < w:
+                    differenceW = int((w - MOD_SIZE_X_BIG)/2)
+                    #crop_img = img[y:y+h, x:x+w]
+                    roi = roi[: ,x+differenceW : x+w-differenceW]
+                if MOD_SIZE_Y_BIG < h:
+                    differenceH = int((h - MOD_SIZE_Y_BIG)/2)
+                    #crop_img = img[y:y+h, x:x+w]
+                    roi = roi[: ,x+differenceH : x+h-differenceH]
+                h, w = roi.shape[:2]
+                #Szerokość
+                if MOD_SIZE_X_BIG - w > 0:
+                    paddingX = int((MOD_SIZE_X_BIG - w)/2)
+                else:
+                    paddingX = 0
+                #Wysokosc
+                if MOD_SIZE_Y_BIG - h > 0:
+                    paddingY = int((MOD_SIZE_Y_BIG - h)/2)
+                else:
+                    paddingY = 0
+
                 roi = cv2.copyMakeBorder(roi, paddingY, paddingY, paddingX, paddingX, cv2.BORDER_CONSTANT, None, 0)
                 x,y = roi.shape[:2]
                 #cv2.imshow("ROI",roi)
@@ -136,7 +156,7 @@ class CropVisitor:
                     os.makedirs(out_dir)
                 cv2.imwrite(out_path, roi) 
 
-            except:
+            except Exception as e:
                 print("Bug = ",file_path  )
                 #cv2.imshow("error",srcImage)
                 #cv2.imshow("ROI",roi)
@@ -201,11 +221,12 @@ def process_dataset(input_root, visitor, dir_index=None, limit=None):
             #print "Processing dir", dirs[i]
             explorer.process_dir(dirs[i], limit=limit)
 
-MOD_SIZE_X = 224
-MOD_SIZE_Y = 224
-input_root = 'C:/ZIARNA/NS2/NoweStanowisko/180708' # D:\NoweStanowisko\180708
+MOD_SIZE_X = 448
+MOD_SIZE_Y = 448
+ORG_SIZE_MP = 2
+input_root = 'C:/ZIARNA/NS2/NoweStanowisko/180919' # D:\NoweStanowisko\180708
 #input_root = 'D:\\NoweStanowisko\\180708' # D:\NoweStanowisko\180708
-output_root = 'C:/NS_224_NR/180708'
+output_root = 'C:/NS_448_NR/180919'
 
 if os.path.exists(output_root):
     print ("Removing", output_root)
