@@ -1,18 +1,19 @@
 import os
 import random
-#from PIL import Image as PilImage
 import cv2
 import numpy as np
 
+import shutil                                      #usuwanie katalogu z zawartością
+
 class FileExplorer:
     def __init__(self, input_root):         
-        self.input_root = input_root                   #przechowywanie stringa ścieżki głównej
-        self.visitors = []                             #
+        self.input_root = input_root               #przechowywanie stringa ścieżki głównej
+        self.visitors = []
         
-    def add_visitor(self, visitor):                     #
+    def add_visitor(self, visitor):                #Lista Wizytorów
         self.visitors.append(visitor)
         
-    def get_dirs(self):                             #listowanie katalogu
+    def get_dirs(self):                            #listowanie katalogu
         dirs = []
         for d in os.listdir(self.input_root):
             path = os.path.join(self.input_root, d)
@@ -48,53 +49,50 @@ class CropVisitor:
         gray = cv2.cvtColor(srcImage, cv2.COLOR_RGB2GRAY)
         ## 3. Do morph-close-op and Threshold
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernelSize,kernelSize))
-        try:
-            th, threshed = cv2.threshold(gray, lowTh, hiTh, 0)
-            #cv2.imshow("threshed", threshed)
-            threshed = cv2.morphologyEx(threshed,cv2.MORPH_CLOSE, kernel)
-            #cv2.imshow("Close", threshed)
-            threshed = cv2.morphologyEx(threshed, cv2.MORPH_OPEN, kernel*4)
-            #cv2.imshow("Open", threshed)
-            #cv2.waitKey(0)
-            ## 4. Findcontours and filter by Area
-            im2, contours, hierarchy = cv2.findContours(threshed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            
-            bigContourArea = 0
-            bigContourId = 0
-            for i, idContours in enumerate(contours):
-                contourArea = cv2.contourArea(contours[i])
-                if contourArea > bigContourArea:
-                    bigContourArea = contourArea
-                    bigContourId = i
-            
-            rect = cv2.minAreaRect(contours[bigContourId])
-            box = cv2.boxPoints(rect)
-            x,y,w,h = cv2.boundingRect(contours[bigContourId])
-            return contours[bigContourId], x,y,w,h
-        except:
-            print("Error - find_bigCountour" )
-
-       
+        th, threshed = cv2.threshold(gray, lowTh, hiTh, 0)
+        #cv2.imshow("threshed", threshed)
+        threshed = cv2.morphologyEx(threshed,cv2.MORPH_CLOSE, kernel)
+        #cv2.imshow("Close", threshed)
+        threshed = cv2.morphologyEx(threshed, cv2.MORPH_OPEN, kernel)
+        #cv2.imshow("Open", threshed)
+        #cv2.waitKey(0)
+        ## 4. Findcontours and filter by Area
+        im2, contours, hierarchy = cv2.findContours(threshed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         
+        bigContourArea = 0
+        bigContourId = 0
+        for i, idContours in enumerate(contours):
+            contourArea = cv2.contourArea(contours[i])
+            if contourArea > bigContourArea:
+                bigContourArea = contourArea
+                bigContourId = i
         
+        rect = cv2.minAreaRect(contours[bigContourId])
+        box = cv2.boxPoints(rect)
+        x,y,w,h = cv2.boundingRect(contours[bigContourId])
+        return contours[bigContourId], x,y,w,h
+    
+    def saveResult(self,fname):
+        return 0
+     
     def visit(self, file_path):
         input_root, fdir, fname = file_path
         
         if fname.find("ext.") == -1:
             image_path = os.path.join(*file_path)
-            print(file_path)
+            #print(file_path)
             srcImage = cv2.imread(image_path, cv2.IMREAD_COLOR)
-#TU FIND BIG COUNTOUR
+#Szukanie największego konturu
             contourBig, x,y,w,h = self.find_bigCountour(srcImage, 35) # self.metod 
 #Walidacja styku z krawędzią obrazu
-            srcImageSizeY, srcImageSizeX = srcImage.shape[:2]
-            print("IMG= ",srcImageSizeX,srcImageSizeY)
+            srcImageSizeY, srcImageSizeX = srcImage.shape[:2]   #Najpierw Y potem X !!
+            #print("IMG= ",srcImageSizeX,srcImageSizeY)
             padding = 10
             paddingTop = y-padding
             paddingDown = y+h+padding
             paddingLeft = x-padding
             paddingRight = x+w+padding
-            print("ROI= ",paddingTop,paddingDown,paddingLeft,paddingRight)
+            #print("ROI= ",paddingTop,paddingDown,paddingLeft,paddingRight)
             cv2.waitKey(0)
             if paddingTop < 0:
                 paddingTop = 0
@@ -104,12 +102,12 @@ class CropVisitor:
                 paddingRight = srcImageSizeX
             if paddingDown > srcImageSizeY:
                 paddingDown = srcImageSizeY
-            print("ROI2= ",paddingTop,paddingDown,paddingLeft,paddingRight)         
+            #print("ROI2= ",paddingTop,paddingDown,paddingLeft,paddingRight)         
             roi = srcImage[paddingTop : paddingDown, paddingLeft : paddingRight] # Y1:Y2 , X1:X2
             roiSizeY, roiSizeX = roi.shape[:2]
-            print("ROI result= ",roiSizeX,roiSizeY)
+            #print("ROI result= ",roiSizeX,roiSizeY)
 #II etap bineralizacji
-            mask = np.zeros((h+2*padding,w+2*padding),np.uint8)
+            mask = np.zeros((paddingDown - paddingTop , paddingRight - paddingLeft ),np.uint8)
             contourBig, x,y,w,h  = self.find_bigCountour(roi, 15) # self.metod
             
             paddingX = int((4*MOD_SIZE_X - w)/2)
@@ -121,45 +119,37 @@ class CropVisitor:
             
                 roi = cv2.copyMakeBorder(roi, paddingY, paddingY, paddingX, paddingX, cv2.BORDER_CONSTANT, None, 0)
                 x,y = roi.shape[:2]
-                cv2.imshow("ROI",roi)
+                #cv2.imshow("ROI",roi)
 
                 roi = cv2.resize(roi,(MOD_SIZE_X,MOD_SIZE_Y), cv2.INTER_CUBIC)
+#ZAPIS PLIKU
+                (fn, fext) = os.path.splitext(fname)                #fn - file name fext - file extention
+                out_path = os.path.join(self.root, fdir, fname)
+                #print("root= ", self.root)
+                #print("fdir= ", fdir)
+                #print("fname= ", fname)
+                #cv2.waitKey(0)
+                out_dir = os.path.dirname(out_path)
+
+                if not os.path.exists(out_dir):
+                    print ("CreatingC", out_dir)
+                    os.makedirs(out_dir)
+                cv2.imwrite(out_path, roi) 
+
             except:
                 print("Bug = ",file_path  )
                 #cv2.imshow("error",srcImage)
+                #cv2.imshow("ROI",roi)
                 #cv2.waitKey(0)
-                #print(self.visit.fname)
-            
+                #print(file_path)
+                (fn, fext) = os.path.splitext(fname)                #fn - file name fext - file extention
+                out_path = os.path.join(self.root,'errors', fdir, fname)
+                out_dir = os.path.dirname(out_path)
 
-            #for cnt in contours:
-               # if cv2.contourArea(cnt) < AREA:
-               #     cv2.drawContours(canvas, [cnt], -1, (0,255,0), 5, cv2.LINE_AA)
-
-            ## 
-            #cv2.imshow("img",srcImage)
-            #cv2.imshow("roi",roi)
-            #cv2.imshow("mask",mask)
-            #cv2.imshow("res",res)
-            #cv2.waitKey(50)
-            #srcImage = PilImage.open(image_path)
-            #modified = PilImage.new(srcImage.mode, (MOD_SIZE, MOD_SIZE))
-            
-
-
-            #paste_x = (MOD_SIZE - srcImage.width)//2
-            #paste_y = (MOD_SIZE - srcImage.height)//2
-            #modified.paste(srcImage, (paste_x, paste_y))     
-
-            (fn, fext) = os.path.splitext(fname)
-
-            out_path = os.path.join(self.root, fdir, fname)
-            out_dir = os.path.dirname(out_path)
-
-            if not os.path.exists(out_dir):
-                print ("CreatingC", out_dir)
-                os.makedirs(out_dir)
-            #modified.save(out_path)
-    
+                if not os.path.exists(out_dir):
+                    print ("CreatingC", out_dir)
+                    os.makedirs(out_dir)
+                cv2.imwrite(out_path, roi)    
 
 class ExpanderVisitor(CropVisitor):
     def __init__(self, root):
@@ -213,17 +203,13 @@ def process_dataset(input_root, visitor, dir_index=None, limit=None):
 
 MOD_SIZE_X = 224
 MOD_SIZE_Y = 224
-BUG = 0
 input_root = 'C:/ZIARNA/NS2/NoweStanowisko/180708' # D:\NoweStanowisko\180708
 #input_root = 'D:\\NoweStanowisko\\180708' # D:\NoweStanowisko\180708
-output_root = 'C:\TEST'
+output_root = 'C:/NS_224_NR/180708'
 
 if os.path.exists(output_root):
     print ("Removing", output_root)
-    try:
-        os.removedirs(output_root)
-    except:
-        print("Removing error")
+    shutil.rmtree(output_root, ignore_errors=True)  #usunięcie katalogu bez względu na zawartość
 
 visitor = CropVisitor(output_root)
-process_dataset(input_root, visitor, dir_index=None, limit=100)
+process_dataset(input_root, visitor, dir_index=None, limit=None)
