@@ -39,66 +39,108 @@ class CropVisitor:
     def __init__(self, root):
         self.root = root
     
-    def find_bigCountour(self, srcImage):
+    def find_bigCountour(self, srcImage, lowTh = 20, hiTh = 255, kernelSize = 3):
+        "Szukanie największego konturu zgodnie z wartościami progowymi"
         self.srcImage = srcImage
+        self.lowTh = lowTh
+        self.hiTh = hiTh
+        self.kernelSize = kernelSize
         gray = cv2.cvtColor(srcImage, cv2.COLOR_RGB2GRAY)
-
         ## 3. Do morph-close-op and Threshold
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
-        morphed = cv2.morphologyEx(gray,cv2.MORPH_CLOSE, kernel)
-        #cv2.imshow("morphed",morphed)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernelSize,kernelSize))
+        try:
+            th, threshed = cv2.threshold(gray, lowTh, hiTh, 0)
+            #cv2.imshow("threshed", threshed)
+            threshed = cv2.morphologyEx(threshed,cv2.MORPH_CLOSE, kernel)
+            #cv2.imshow("Close", threshed)
+            threshed = cv2.morphologyEx(threshed, cv2.MORPH_OPEN, kernel*4)
+            #cv2.imshow("Open", threshed)
+            #cv2.waitKey(0)
+            ## 4. Findcontours and filter by Area
+            im2, contours, hierarchy = cv2.findContours(threshed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            
+            bigContourArea = 0
+            bigContourId = 0
+            for i, idContours in enumerate(contours):
+                contourArea = cv2.contourArea(contours[i])
+                if contourArea > bigContourArea:
+                    bigContourArea = contourArea
+                    bigContourId = i
+            
+            rect = cv2.minAreaRect(contours[bigContourId])
+            box = cv2.boxPoints(rect)
+            x,y,w,h = cv2.boundingRect(contours[bigContourId])
+            return contours[bigContourId], x,y,w,h
+        except:
+            print("Error - find_bigCountour" )
 
-        th, threshed = cv2.threshold(morphed, 35, 255, 0)
-
-        #cv2.imshow("threshed",threshed)
-        ## 4. Findcontours and filter by Area
-        im2, contours, hierarchy = cv2.findContours(threshed, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+       
         
-        bigContourArea = 0
-        bigContourId = 0
-        for i, idContours in enumerate(contours):
-            contourArea = cv2.contourArea(contours[i])
-            if contourArea > bigContourArea:
-                bigContourArea = contourArea
-                bigContourId = i
-        #print(bigContourId, fname, bigContourArea )
-
-
-        return contours[bigContourId]
         
     def visit(self, file_path):
         input_root, fdir, fname = file_path
+        
         if fname.find("ext.") == -1:
             image_path = os.path.join(*file_path)
-
+            print(file_path)
             srcImage = cv2.imread(image_path, cv2.IMREAD_COLOR)
 #TU FIND BIG COUNTOUR
-            contourBig = self.find_bigCountour(srcImage)
-            rect = cv2.minAreaRect(contourBig)
-            box = cv2.boxPoints(rect)
-            x,y,w,h = cv2.boundingRect(contourBig)
-            paddingX = int((MOD_SIZE - w)/2)
-            paddingY = int((MOD_SIZE - h)/2)
-            padding = 30
-            #cv2.rectangle(srcImage,(x-padding,y-padding),(x+w+padding,y+h+padding),(0,255,0),2)
+            contourBig, x,y,w,h = self.find_bigCountour(srcImage, 35) # self.metod 
+#Walidacja styku z krawędzią obrazu
+            srcImageSizeY, srcImageSizeX = srcImage.shape[:2]
+            print("IMG= ",srcImageSizeX,srcImageSizeY)
+            padding = 10
+            paddingTop = y-padding
+            paddingDown = y+h+padding
+            paddingLeft = x-padding
+            paddingRight = x+w+padding
+            print("ROI= ",paddingTop,paddingDown,paddingLeft,paddingRight)
+            cv2.waitKey(0)
+            if paddingTop < 0:
+                paddingTop = 0
+            if paddingLeft < 0:
+                paddingLeft = 0            
+            if paddingRight > srcImageSizeX:
+                paddingRight = srcImageSizeX
+            if paddingDown > srcImageSizeY:
+                paddingDown = srcImageSizeY
+            print("ROI2= ",paddingTop,paddingDown,paddingLeft,paddingRight)         
+            roi = srcImage[paddingTop : paddingDown, paddingLeft : paddingRight] # Y1:Y2 , X1:X2
+            roiSizeY, roiSizeX = roi.shape[:2]
+            print("ROI result= ",roiSizeX,roiSizeY)
+#II etap bineralizacji
+            mask = np.zeros((h+2*padding,w+2*padding),np.uint8)
+            contourBig, x,y,w,h  = self.find_bigCountour(roi, 15) # self.metod
+            
+            paddingX = int((4*MOD_SIZE_X - w)/2)
+            paddingY = int((4*MOD_SIZE_Y - h)/2)
+            cv2.drawContours(mask,[contourBig],0,255,-1)
+            try:
+                roi = cv2.bitwise_and(roi,roi,mask = mask)
+                roi = roi[y : y+h, x : x+w]
+            
+                roi = cv2.copyMakeBorder(roi, paddingY, paddingY, paddingX, paddingX, cv2.BORDER_CONSTANT, None, 0)
+                x,y = roi.shape[:2]
+                cv2.imshow("ROI",roi)
 
-            #cv2.drawContours(srcImage, contours[bigContourId], -1, (0,255,0), 5, cv2.FILLED)
-            #box = np.int0(box) #wymagane przy drawCountour - ponizej
-            #cv2.drawContours(srcImage,[box],0,(0,0,255),2)
-            roi = srcImage[y-padding : y+h+padding, x-padding : x+w+padding] # Y1:Y2 , X1:X2
+                roi = cv2.resize(roi,(MOD_SIZE_X,MOD_SIZE_Y), cv2.INTER_CUBIC)
+            except:
+                print("Bug = ",file_path  )
+                #cv2.imshow("error",srcImage)
+                #cv2.waitKey(0)
+                #print(self.visit.fname)
+            
 
-            #roi = cv2.bitwise_and(roi,roi,mask = roiThreshed)
-
-            res = cv2.resize(roi,(int(w/4),int(h/4)), cv2.INTER_CUBIC)
             #for cnt in contours:
                # if cv2.contourArea(cnt) < AREA:
                #     cv2.drawContours(canvas, [cnt], -1, (0,255,0), 5, cv2.LINE_AA)
 
             ## 
             #cv2.imshow("img",srcImage)
-            cv2.imshow("roi",roi)
-            cv2.imshow("res",res)
-            cv2.waitKey(0)
+            #cv2.imshow("roi",roi)
+            #cv2.imshow("mask",mask)
+            #cv2.imshow("res",res)
+            #cv2.waitKey(50)
             #srcImage = PilImage.open(image_path)
             #modified = PilImage.new(srcImage.mode, (MOD_SIZE, MOD_SIZE))
             
@@ -169,7 +211,9 @@ def process_dataset(input_root, visitor, dir_index=None, limit=None):
             #print "Processing dir", dirs[i]
             explorer.process_dir(dirs[i], limit=limit)
 
-MOD_SIZE = 896
+MOD_SIZE_X = 224
+MOD_SIZE_Y = 224
+BUG = 0
 input_root = 'C:/ZIARNA/NS2/NoweStanowisko/180708' # D:\NoweStanowisko\180708
 #input_root = 'D:\\NoweStanowisko\\180708' # D:\NoweStanowisko\180708
 output_root = 'C:\TEST'
@@ -182,5 +226,4 @@ if os.path.exists(output_root):
         print("Removing error")
 
 visitor = CropVisitor(output_root)
-
-process_dataset(input_root, visitor, dir_index=None, limit=2)
+process_dataset(input_root, visitor, dir_index=None, limit=100)
