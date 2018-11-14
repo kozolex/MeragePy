@@ -88,6 +88,7 @@ class CropVisitor:
             srcImageSizeY, srcImageSizeX = srcImage.shape[:2]   #Najpierw Y potem X !!
             #print("IMG= ",srcImageSizeX,srcImageSizeY)
             padding = 10
+            biectOnEdge = False
             paddingTop = y-padding
             paddingDown = y+h+padding
             paddingLeft = x-padding
@@ -96,12 +97,20 @@ class CropVisitor:
             cv2.waitKey(0)
             if paddingTop < 0:
                 paddingTop = 0
+                biectOnEdge = True
+                
             if paddingLeft < 0:
-                paddingLeft = 0            
+                paddingLeft = 0
+                biectOnEdge = True
+                           
             if paddingRight > srcImageSizeX:
                 paddingRight = srcImageSizeX
+                biectOnEdge = True
+                
             if paddingDown > srcImageSizeY:
                 paddingDown = srcImageSizeY
+                biectOnEdge = True
+                
             #print("ROI2= ",paddingTop,paddingDown,paddingLeft,paddingRight)         
             roi = srcImage[paddingTop : paddingDown, paddingLeft : paddingRight] # Y1:Y2 , X1:X2
             roiSizeY, roiSizeX = roi.shape[:2]
@@ -144,11 +153,14 @@ class CropVisitor:
                 roi = cv2.resize(roi,(MOD_SIZE_X,MOD_SIZE_Y), cv2.INTER_CUBIC)
 #ZAPIS PLIKU
                 (fn, fext) = os.path.splitext(fname)                #fn - file name fext - file extention
-                out_path = os.path.join(self.root, fdir, fname)
-                #print("root= ", self.root)
-                #print("fdir= ", fdir)
-                #print("fname= ", fname)
-                #cv2.waitKey(0)
+
+                #zapis obrazów stykających się z krawędzią ekranu do osobnego katalogu. 
+                if biectOnEdge == False:
+                    out_path = os.path.join(self.root, fdir, fname)
+                else:
+                    out_path = os.path.join(self.root, "onEdge", fdir, fname)
+                    print("BAD")
+
                 out_dir = os.path.dirname(out_path)
 
                 if not os.path.exists(out_dir):
@@ -157,7 +169,7 @@ class CropVisitor:
                 cv2.imwrite(out_path, roi) 
 
             except Exception as e:
-                print("Bug = ",file_path  )
+                print("Bug = ",file_path, e )
                 #cv2.imshow("error",srcImage)
                 #cv2.imshow("ROI",roi)
                 #cv2.waitKey(0)
@@ -221,12 +233,12 @@ def process_dataset(input_root, visitor, dir_index=None, limit=None):
             #print "Processing dir", dirs[i]
             explorer.process_dir(dirs[i], limit=limit)
 
-MOD_SIZE_X = 448
-MOD_SIZE_Y = 448
-ORG_SIZE_MP = 2
-input_root = 'C:/ZIARNA/NS2/NoweStanowisko/180919' # D:\NoweStanowisko\180708
+MOD_SIZE_X = 224
+MOD_SIZE_Y = 224
+ORG_SIZE_MP = 4 #Rozmiar dla 224 =>4 a dla 448 -> 2 
+input_root = 'C:/ZIARNA/NS2/NoweStanowisko/180708' # D:\NoweStanowisko\180708
 #input_root = 'D:\\NoweStanowisko\\180708' # D:\NoweStanowisko\180708
-output_root = 'C:/NS_448_NR/180919'
+output_root = 'C:/NS_224_NR_2/180708'
 
 if os.path.exists(output_root):
     print ("Removing", output_root)
