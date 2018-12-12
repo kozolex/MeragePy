@@ -8,29 +8,26 @@ import cv2
 import os
 import sys
 
-class PreprocessImg(dirPath):
 
-    def listDirectory (directory, fileExtList):
-        u"zwraca listę obiektów zawierających metadane dla plików o podanych rozszerzeniach"
-        fileList = os.listdir(directory)
-        fileList = [os.path.join(directory, f) for f in fileList \
-                    if os.path.splitext(f)[1] in fileExtList]
-        return fileList
 
-    def merage2Img (dirSource, extention, width, height):
-        u"zwraca "
-        listaKatLog1 = listDirectory("E:/ZIARNA/NoweStanowisko/180708/Zdrowe", [extention])
-    
+def listDirectory (directory, fileExtList):
+    u"zwraca listę obiektów zawierających metadane dla plików o podanych rozszerzeniach"
+    fileList = os.listdir(directory)
+    fileList = [os.path.join(directory, f) for f in fileList \
+                if os.path.splitext(f)[1] in fileExtList]
+    return fileList
 
-    return image3
 
-#listaKat = listDirectory("D:\\ziarno2\\TIFF", [".tif"])
+listaKat = listDirectory("G:\\ziarno2\\NoweStanowisko2018_11\\NoweStanowiskoPION\\ORG\\180708\\Zdrowe", [".tif"])
 
-findText = "log2.tif"
-imgToBigCounter = 0 
+findText = "log2.tif"           #szykany ciąg znaków - tylko pliki zawierające ten ciąg będą na liście
+imgToBigCounter = 0             #liczba zdjęć przekraczający dozwolony rozmiar
+#size of images FULL SIZE 396 x 920
+hMax = 850
+wMax = 400
 mylist = []
 #Create new list with only tif RGB images
-for i in listaKatLog1:
+for i in listaKat:
     if findText in i:
         #print(i)
         mylist.append(i)
@@ -41,21 +38,30 @@ for idList in range(0,len(mylist)):
     imgID = imgStr[-20:-15]                 #Grain ID 
     imgCamSide = imgStr[-14:-13]            #What side of camera b or t (back / top)
     image1= cv2.imread(mylist[idList])      #read first image to matrix
+
+    srcMaskPath1 = mylist[idList][:-5] + "3" + mylist[idList][-4:]
+    maskImage = cv2.imread(srcMaskPath1,0)       #maska pliku (odcienie szarosci w tym przypadku czarno białe)
+    th, result = cv2.threshold(maskImage,10,255,cv2.THRESH_BINARY)
+    image1 = cv2.bitwise_and(image1,image1,mask = result)  #Usunięcie czerni z wykorzystaniem maski
+
     if idList<=len(mylist):
         idList = idList+1                       #incremet idList to find second image
-                        #Counter how many image is too big to target resolution
+                                                #Counter how many image is too big to target resolution
     if imgID in mylist[idList]:
         image2= cv2.imread(mylist[idList])
         #print(mylist[idList-1]+ "\n" + mylist[idList])
+
+        srcMaskPath2 = mylist[idList][:-5] + "3" + mylist[idList][-4:]
+        maskImage2 = cv2.imread(srcMaskPath2,0)       #maska pliku (odcienie szarosci w tym przypadku czarno białe)
+        th, result = cv2.threshold(maskImage2,10,255,cv2.THRESH_BINARY)
+        image2 = cv2.bitwise_and(image2,image2,mask = result)  #Usunięcie czerni z wykorzystaniem maski
 
         #print(imgStr[-5:-4])
         imgStrCheck = imgStr[:-5] + "3" + imgStr[-4:]
         image1Check = cv2.imread(imgStrCheck) 
         #print(imgStrCheck)
 
-        #size of images FULL SIZE 396 x 920
-        hMax = 850
-        wMax = 400
+
         h1, w1 = image1.shape[:2]
         h2, w2 = image2.shape[:2]
         hPadding1 = (hMax-h1)//2

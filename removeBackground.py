@@ -8,8 +8,9 @@ def listDirectory(directory, fileExtList):
     fileList = [os.path.join(directory, f) for f in fileList \
                 if os.path.splitext(f)[1] in fileExtList]
     return fileList
+
 findText = 'log2.tif'  #nazwa szukanego pliku
-fileList = listDirectory('E:/ZIARNA/NoweStanowisko/180708/', '.tif')# 180708 180919
+fileList = listDirectory('E:/ZIARNA/NoweStanowisko/180919/', '.tif')# 180708 180919
 file = open('c:/180708.txt','w') #otwarcie pliku do zapisu (nadpisuje wczesniej istjenijący plik)
 for oneFile in fileList:        #przeglądanie katalogu głównego - podkatalogi
     print(oneFile)              #wyświetlanie bierzącego katalogu
@@ -25,7 +26,7 @@ for oneFile in fileList:        #przeglądanie katalogu głównego - podkatalogi
                 srcMaskPath = oneFile2[:-5] + "3" + oneFile2[-4:]
 
                 srcImage = cv2.imread(srcImgPath,1)      # 0-grayscale 1-rgb -1-alpha channel
-                maskImage = cv2.imread(srcMaskPath,0)
+                maskImage = cv2.imread(srcMaskPath,0)       #maska pliku (odcienie szarosci w tym przypadku czarno białe)
                 if srcImage is not None and maskImage is not None:
                     th, result = cv2.threshold(maskImage,10,255,cv2.THRESH_BINARY)
                     result2 = cv2.cvtColor(result,cv2.COLOR_GRAY2BGR )
@@ -35,7 +36,8 @@ for oneFile in fileList:        #przeglądanie katalogu głównego - podkatalogi
                     file.write(dirPath + ',' + fileName + ',' + str(height)+ ',' + str(width) + '\n' )
 
                     roi = srcImage[0:height, 0:width ]
-                    srcImage2 = cv2.bitwise_and(roi,roi,mask = result)
+                    srcImage2 = cv2.bitwise_and(roi,roi,mask = result)  #Usunięcie czerni z wykorzystaniem maski
+
                     newDirectory = 'C'+dirPath[1:]
                     #print(newDirectory)
                     if not os.path.exists(newDirectory):
