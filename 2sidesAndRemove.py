@@ -18,11 +18,11 @@ def listDirectory (directory, fileExtList):
     return fileList
 
 
-listaKat = listDirectory("E:\\ZIARNA\\NoweStanowisko\\180708\\Zdrowe", [".tif"])
+listaKat = listDirectory("E:\\ZIARNA\\NoweStanowisko\\180919\\ZielZad", [".tif"]) # Polowki SplesDetPor WybZar  Zdrowe ZielZad
 
 findText = "log2.tif"           #szykany ciąg znaków - tylko pliki zawierające ten ciąg będą na liście
 imgToBigCounter = 0             #liczba zdjęć przekraczający dozwolony rozmiar
-#size of images FULL SIZE 396 x 920
+#size of images FULL SIZE 450 x 900
 hMax = 900
 wMax = 450
 mylist = []
@@ -44,7 +44,7 @@ for idList in range(0,len(mylist)):
     th, result = cv2.threshold(maskImage1,10,255,cv2.THRESH_BINARY)
     image1 = cv2.bitwise_and(image1,image1,mask = result)  #Usunięcie czerni z wykorzystaniem maski
 
-    if idList<=len(mylist):
+    if idList<len(mylist):
         idList = idList+1                       #incremet idList to find second image
                                                 #Counter how many image is too big to target resolution
     if imgID in mylist[idList]:
@@ -90,7 +90,7 @@ for idList in range(0,len(mylist)):
                 newDirectory = 'C'+dirPath[1:]
                 if not os.path.exists(newDirectory):
                     os.makedirs(newDirectory)
-                cv2.imwrite(newDirectory+ '/'+fileName[:-3]+'png',merageImg)
+                cv2.imwrite(newDirectory+ '/1'+fileName[:-3]+'png',merageImg) #"1 w stringu pojawia się po to aby nazwy plikow się nie pokrywaly"
                 #cv2.waitKey(10)
         else:
             print(srcMaskPath1)
