@@ -7,8 +7,7 @@ import numpy as np
 import cv2
 import os
 import sys
-
-
+#komentarz a
 
 def listDirectory (directory, fileExtList):
     u"zwraca listę obiektów zawierających metadane dla plików o podanych rozszerzeniach"
